@@ -4,6 +4,8 @@ const readline = require('readline');
 const rs = fs.createReadStream('./popu-pref.csv');
 const rl = readline.createInterface({'input': rs, 'output': {} });
 const prefectureDateMap = new Map();  //key:都道府県 value:集計データのオブジェクト
+
+// 一行読んだら以下の処理を実行する
 rl.on('line', (lineString) => {
   // ファイルから必要なデータを抜き出す
   const columns = lineString.split(',');
@@ -26,14 +28,18 @@ rl.on('line', (lineString) => {
       value.popu15 = popu;
     }
     prefectureDateMap.set(prefecture, value);
+    // prefectureDateMap.set('北海道', { popu10: 270000, popu15: 277777, change: null } );の形を作っている
   }
 });
 
+// 全ての行を読み込み終わったら以下の処理を実行する
 rl.on('close', () => {
+  // 変化率を計算
   for(let [key, value] of prefectureDateMap){
     value.change = value.popu15 / value.popu10;
   }
-  // 大きい順に並べ替え
+  // 変化率の大きい順に並び替え
+  // 連想配列は並び替えの関数を持っていないので、配列に変換して並び替える
   const rankingArray = Array.from(prefectureDateMap).sort((pair1, pair2) => {
     return pair2[1].change - pair1[1].change;
   });
